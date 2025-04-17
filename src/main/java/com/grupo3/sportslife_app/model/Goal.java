@@ -1,7 +1,6 @@
 package com.grupo3.sportslife_app.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.grupo3.sportslife_app.enums.StatusEnum;
 
 import jakarta.persistence.Entity;
