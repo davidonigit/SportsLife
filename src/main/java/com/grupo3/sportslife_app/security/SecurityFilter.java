@@ -48,7 +48,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             var login = tokenService.validateToken(token);
 
             if (login != null) {
-                logger.info("Token válido para o usuário: {}", login);
+                logger.info("Valid Token for user: {}", login);
                 
                 // MUDANÇA CRÍTICA: Não carregue o objeto User completo
                 // Em vez disso, capture apenas as informações básicas do usuário
@@ -71,9 +71,9 @@ public class SecurityFilter extends OncePerRequestFilter {
                 // Definir a autenticação no contexto
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 
-                logger.info("Usuário autenticado com sucesso: {}", login);
+                logger.info("user authenticated: {}", login);
             } else if (token != null) {
-                logger.warn("Token inválido fornecido");
+                logger.warn("Invalid Token");
             }
 
             // Continuar a cadeia de filtros
@@ -81,7 +81,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             
         } catch (Exception e) {
             // Log detalhado do erro
-            logger.error("Erro no filtro de segurança: " + e.getMessage(), e);
+            logger.error("Security filter error: " + e.getMessage(), e);
             
             // CRUCIAL: Limpar o contexto de segurança se qualquer exceção ocorrer
             SecurityContextHolder.clearContext();
@@ -90,9 +90,9 @@ public class SecurityFilter extends OncePerRequestFilter {
             if (!response.isCommitted()) {
                 response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
                 response.setContentType("application/json");
-                response.getWriter().write("{'error':'Erro de autenticação: " + e.getMessage() + "'}");
+                response.getWriter().write("{'error':'Authentication error: " + e.getMessage() + "'}");
             } else {
-                logger.warn("Não foi possível enviar resposta de erro - resposta já enviada");
+                logger.warn("Response already sent");
             }
             
             // Continuar com a cadeia de filtros
