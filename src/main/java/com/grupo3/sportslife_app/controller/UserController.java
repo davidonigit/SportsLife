@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo3.sportslife_app.dto.CreateUserDTO;
 import com.grupo3.sportslife_app.dto.UserDTO;
+import com.grupo3.sportslife_app.model.GoalBoard;
 import com.grupo3.sportslife_app.model.User;
 import com.grupo3.sportslife_app.repository.UserRepository;
 
@@ -47,7 +48,8 @@ public class UserController {
         }
 
         // Cria o usuário com as roles
-        User user = new User(null, body.name(), body.email(), passwordEncoder.encode(body.password()), null);
+        GoalBoard board = new GoalBoard();
+        User user = new User(null, body.name(), body.email(), passwordEncoder.encode(body.password()), board);
         userRepository.save(user);
 
         return ResponseEntity.ok(user);

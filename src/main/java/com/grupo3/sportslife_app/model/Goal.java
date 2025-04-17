@@ -1,5 +1,6 @@
 package com.grupo3.sportslife_app.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.grupo3.sportslife_app.enums.StatusEnum;
 
 import jakarta.persistence.Entity;
@@ -27,6 +28,7 @@ public class Goal {
 
     @ManyToOne
     @JoinColumn(name = "goal_board_id", nullable = false)
+    @JsonBackReference
     private GoalBoard goalBoard;
 
 }
