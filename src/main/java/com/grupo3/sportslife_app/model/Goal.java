@@ -1,5 +1,7 @@
 package com.grupo3.sportslife_app.model;
 
+import com.grupo3.sportslife_app.enums.StatusEnum;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,7 +23,7 @@ public class Goal {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private StatusEnum status;
 
     @ManyToOne
     @JoinColumn(name = "goal_board_id", nullable = false)
