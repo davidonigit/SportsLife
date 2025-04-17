@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.Data;
 
-@Entity
+@Entity(name = "users")
 @Data
 public class User {
     
@@ -18,6 +18,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(unique = true, nullable = false)
