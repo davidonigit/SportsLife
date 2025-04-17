@@ -48,6 +48,7 @@ public class SecurityConfig {
                         // Rotas públicas
                         .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         // Demais rotas somente autenticado
                         .anyRequest().authenticated())
                 .logout(logout -> logout
