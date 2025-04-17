@@ -46,7 +46,6 @@ public class TokenService {
     }
 
     private Instant generateExpirationDate() {
-        long expirationSeconds = Long.parseLong("${api.security.token.expiration}");
-        return LocalDateTime.now().plusSeconds(expirationSeconds).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now().plusSeconds(3600).toInstant(ZoneOffset.of("-03:00"));
     }
 }
