@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.grupo3.sportslife_app.model.GoalBoard;
+import com.grupo3.sportslife_app.model.SportRoutine;
 
 @Repository
-public interface GoalBoardRepository extends JpaRepository<GoalBoard, Long> {
-     Optional<GoalBoard> findByUserId(Long usedId);
+public interface SportRoutineRepository extends JpaRepository <SportRoutine, Long>{
+    Optional<SportRoutine> findByUserId(Long usedId);
 }

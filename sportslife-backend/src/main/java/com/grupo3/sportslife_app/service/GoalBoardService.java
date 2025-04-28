@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.grupo3.sportslife_app.model.Goal;
 import com.grupo3.sportslife_app.model.GoalBoard;
+import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.repository.GoalBoardRepository;
 import com.grupo3.sportslife_app.repository.GoalRepository;
 
@@ -27,6 +28,10 @@ public class GoalBoardService {
 
     public Optional<GoalBoard> getGoalBoardById(Long id){
         return goalBoardRepository.findById(id);
+    }
+
+    public Optional<GoalBoard> findByUserId(Long userId) {
+        return goalBoardRepository.findByUserId(userId);
     }
 
     public Optional<Goal> getGoalById(Long goalId){

@@ -1,5 +1,7 @@
 package com.grupo3.sportslife_app.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,5 +35,11 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goal_board_id", unique = true)
+    @JsonManagedReference
     private GoalBoard goalBoard;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "sport_routine_id", unique = true)
+    @JsonManagedReference
+    private SportRoutine sportRoutine;
 }

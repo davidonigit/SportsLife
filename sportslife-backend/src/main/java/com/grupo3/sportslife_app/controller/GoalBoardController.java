@@ -6,6 +6,7 @@ import com.grupo3.sportslife_app.dto.GoalDTO;
 import com.grupo3.sportslife_app.enums.StatusEnum;
 import com.grupo3.sportslife_app.model.Goal;
 import com.grupo3.sportslife_app.model.GoalBoard;
+import com.grupo3.sportslife_app.security.SecurityUtils;
 import com.grupo3.sportslife_app.service.GoalBoardService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,41 +34,50 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class GoalBoardController {
 
     private final GoalBoardService goalBoardService;
+    private final SecurityUtils securityUtils;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<GoalBoard> getGoalBoardById(@PathVariable Long id){
-        return goalBoardService.getGoalBoardById(id)
+    @GetMapping
+    public ResponseEntity<GoalBoard> getGoalBoard(){
+        Long userId = securityUtils.getCurrentUserId();
+        return goalBoardService.getGoalBoardById(userId)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping
+    /* @GetMapping
     public ResponseEntity<List<GoalBoard>> getAllGoalBoards(){
         return ResponseEntity.ok(goalBoardService.getAllGoalBoards());
-    }
+    } */
 
-    @PostMapping("/{id}/goals")
-    public ResponseEntity<GoalBoard> addGoalToBoard(@RequestBody Goal goal, @PathVariable Long id) {
+    @PostMapping
+    public ResponseEntity<GoalBoard> addGoalToBoard(@RequestBody Goal goal) {
+        Long userId = securityUtils.getCurrentUserId();
         if(goal.getStatus() == null) {
             goal.setStatus(StatusEnum.TO_DO);
         }
 
+        GoalBoard goalBoard = goalBoardService.findByUserId(userId).orElse(null);
+        if (goalBoard == null){
+            return ResponseEntity.notFound().build();
+        }
+        Long goalBoardId = goalBoard.getId();
+        
         try{
-            GoalBoard updatedGoalBoard = goalBoardService.addGoalToBoard(goal, id);
+            GoalBoard updatedGoalBoard = goalBoardService.addGoalToBoard(goal, goalBoardId);
             return ResponseEntity.ok(updatedGoalBoard);
         }catch(RuntimeException e){
             return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping("/{id}/goals/{goalId}")
-    public ResponseEntity<Goal> getGoalById(@PathVariable Long id,@PathVariable Long goalId){
+    @GetMapping("/goals/{goalId}")
+    public ResponseEntity<Goal> getGoalById(@PathVariable Long goalId){
         return goalBoardService.getGoalById(goalId)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
     
-    @PutMapping("/{id}/goals/{goalId}")
+    @PutMapping("/goals/{goalId}")
     public ResponseEntity<Goal> updateGoal(@PathVariable Long goalId, @RequestBody GoalDTO body){
         Goal goal = goalBoardService.getGoalById(goalId)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -76,7 +87,7 @@ public class GoalBoardController {
         return ResponseEntity.ok(goal);
     }
 
-    @DeleteMapping("/{id}/goals/{goalId}")
+    @DeleteMapping("/goals/{goalId}")
     public ResponseEntity<?> deleteGoal(@PathVariable Long goalId){
         try {
             goalBoardService.deleteGoal(goalId);
