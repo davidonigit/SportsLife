@@ -35,6 +35,7 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "goal_board_id", unique = true)
+    @JsonManagedReference
     private GoalBoard goalBoard;
 
     @OneToOne(cascade = CascadeType.ALL)
