@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.grupo3.sportslife_app.model.Goal;
 import com.grupo3.sportslife_app.model.GoalBoard;
-import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.repository.GoalBoardRepository;
 import com.grupo3.sportslife_app.repository.GoalRepository;
 

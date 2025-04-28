@@ -87,14 +87,14 @@ public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     
-    String email = (String) authentication.getPrincipal();
+    /* String email = (String) authentication.getPrincipal();
     User currentUser = userRepository.findByEmail(email)
                          .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
     
     //Bloqueia user de se autoexcluir
-    //if (currentUser.getId().equals(id)) {
-    //   return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    //}
+    if (currentUser.getId().equals(id)) {
+       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    } */
     
     if (!userRepository.existsById(id)) {
         return ResponseEntity.notFound().build();
