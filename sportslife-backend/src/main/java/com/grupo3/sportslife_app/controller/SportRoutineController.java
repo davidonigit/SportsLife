@@ -40,17 +40,6 @@ public class SportRoutineController {
             .orElse(ResponseEntity.notFound().build());
     } */
 
-    /* @PutMapping
-    public ResponseEntity<SportRoutine> updateSportName(@RequestBody SportRoutineDTO body){
-        Long userId = securityUtils.getCurrentUserId();
-        SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
-        
-        sportRoutineService.updateSportName(sportRoutine.getId(), body.name());
-        return ResponseEntity.ok(sportRoutine);
-
-    } */
-
     @PutMapping
     public ResponseEntity<SportRoutine> updateSportRoutine(@RequestBody SportRoutineDTO body){
         Long userId = securityUtils.getCurrentUserId();
