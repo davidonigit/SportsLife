@@ -35,8 +35,9 @@ public class UserService {
         SportRoutine sportRoutine = new SportRoutine();
         User user = new User(null, userDTO.name(), userDTO.email(), passwordEncoder.encode(userDTO.password()), board, sportRoutine);
         sportRoutine.setUser(user);
+        userRepository.save(user);
         sportRoutineService.initializeWeeklyAvailability(sportRoutine.getId());
-        return userRepository.save(user);
+        return user;
     }
 
     public User update(Long id, UserDTO userDTO) {

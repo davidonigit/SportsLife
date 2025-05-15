@@ -35,7 +35,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getAll());
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<User> createUser(@RequestBody CreateUserDTO body) {
         if (userService.existsByEmail(body.email())) {
             return ResponseEntity.badRequest().build();

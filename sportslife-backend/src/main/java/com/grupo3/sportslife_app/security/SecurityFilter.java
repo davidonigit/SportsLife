@@ -13,8 +13,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.grupo3.sportslife_app.model.User;
-import com.grupo3.sportslife_app.repository.UserRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +27,6 @@ public class SecurityFilter extends OncePerRequestFilter {
     
     @Autowired
     TokenService tokenService;
-    
-    @Autowired
-    UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -48,9 +43,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             if (login != null) {
                 logger.info("Valid Token for user: {}", login);
-
-                User user = userRepository.findByEmail(login)
-                        .orElseThrow(() -> new RuntimeException("User Not Found"));
                 
                 var authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
                 
