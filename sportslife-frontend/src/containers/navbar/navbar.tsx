@@ -32,8 +32,10 @@ export default function Navbar() {
       <h1
         style={{
           fontSize: "2rem",
-          letterSpacing: "0.05em",
-        }}
+          letterSpacing: "0.05em"
+        }} 
+        className="cursor-pointer"
+        onClick={() => router.push("/")}
       >
         SportsLife
       </h1>

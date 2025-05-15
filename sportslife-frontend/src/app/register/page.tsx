@@ -2,30 +2,33 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useCreateUser } from "@/hooks/use-create-user";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [success, setSuccess] = useState("");
+  const { mutateAsync } = useCreateUser();
+  const router = useRouter();
 
-  function handleChange(e) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setSuccess("");
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Aqui você pode enviar os dados via API
-    setSuccess("Cadastro realizado com sucesso!");
-    setForm({ name: "", email: "", password: "" });
+
+    if (form.name && form.email && form.password) {
+      try {
+        await mutateAsync(form);
+        router.push("/login");
+      } catch (error) {
+        console.error("Erro ao registrar:", error);
+      }
+    }
   }
 
   return (
-    <div
-      className="w-full min-h-screen flex flex-col bg-[var(--gray-bg)]"
-      style={{ minHeight: "100vh" }}
-    >
-
-      {/* Centralização por flex */}
+    <div className="w-full min-h-screen flex flex-col bg-[var(--gray-bg)]">
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="form-wrapper">
           <div className="form-title">Crie sua conta</div>
@@ -73,7 +76,6 @@ export default function RegisterPage() {
             <button type="submit" className="main-button">
               Registrar
             </button>
-            {success && <div className="form-success">{success}</div>}
           </form>
           <Link href="/login" className="secondary-button">
             Já tem conta? Fazer Login

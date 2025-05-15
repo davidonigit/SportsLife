@@ -4,10 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useLogin } from "@/hooks/use-login";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const { mutate } = useLogin();
+  const router = useRouter();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,9 +21,10 @@ export default function LoginPage() {
     if (form.email && form.password) {
       try {
         await mutate({ email: form.email, password: form.password });
+        router.push("/")
       } catch (error) {
         console.error("Erro ao autenticar:", error);
-        toast.error("Falha ao autenticar.");
+        toast.error("Falha ao realizar login.");
       }
     } else {
       toast.error("Preencha todos os campos.");
@@ -41,7 +44,6 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 name="email"
-                autoComplete="username"
                 value={form.email}
                 onChange={handleChange}
                 placeholder="Seu e-mail"
@@ -55,7 +57,6 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 name="password"
-                autoComplete="current-password"
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Sua senha"

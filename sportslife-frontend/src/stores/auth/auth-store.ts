@@ -1,6 +1,5 @@
-// src/stores/auth/auth-store.ts
-
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface User {
   id: number;
@@ -18,21 +17,29 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
-
-  setUser: (user) => set({ user }),
-  setToken: (token) => set({ token }),
-  setAuthenticated: (value) => set({ isAuthenticated: value }),
-
-  logout: () => {
-    localStorage.removeItem("token");
-    set({
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       user: null,
       token: null,
       isAuthenticated: false,
-    });
-  },
-}));
+      setUser: (user) => set({ user }),
+      setToken: (token) => set({ token }),
+      setAuthenticated: (value) => set({ isAuthenticated: value }),
+      logout: () =>
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+        }),
+    }),
+    {
+      name: "auth-storage", // chave no localStorage
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+);
