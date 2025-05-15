@@ -14,6 +14,8 @@ import com.grupo3.sportslife_app.service.SportRoutineService;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @Controller
@@ -23,22 +25,23 @@ public class SportRoutineController {
     
     private final SportRoutineService sportRoutineService;
     private final SecurityUtils securityUtils;
-
+    
     @GetMapping
     public ResponseEntity<SportRoutine> getMyRoutine() {
         Long userId = securityUtils.getCurrentUserId();
-        
         return sportRoutineService.findByUserId(userId)
                 .map(routine -> ResponseEntity.ok(routine))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+
+    @GetMapping("/generate")
+    public void generateSportRoutine() {
+        Long userId = securityUtils.getCurrentUserId();
+        System.out.println("User ID!!!: " + userId);
+        sportRoutineService.generateSportRoutine(userId);
+    }
     
-    /* @GetMapping("/{id}")
-    public ResponseEntity<SportRoutine> getSportRoutineById(@PathVariable Long id){
-        return sportRoutineService.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    } */
 
     @PutMapping
     public ResponseEntity<SportRoutine> updateSportRoutine(@RequestBody SportRoutineDTO body){
@@ -58,4 +61,6 @@ public class SportRoutineController {
         sportRoutineService.saveSportRoutine(sportRoutine);
         return ResponseEntity.ok(sportRoutine);
     }
+
+    
 }

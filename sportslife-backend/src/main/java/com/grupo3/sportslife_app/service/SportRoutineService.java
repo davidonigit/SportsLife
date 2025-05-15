@@ -23,6 +23,7 @@ public class SportRoutineService {
     
     private final SportRoutineRepository sportRoutineRepository;
     private final DailyAvailabilityRepository dailyAvailabilityRepository;
+    private final FachadaLLM fachadaLLM;
     
 
     public Optional<SportRoutine> findById(Long id) {
@@ -33,6 +34,7 @@ public class SportRoutineService {
     public Optional<SportRoutine> findByUserId(Long userId) {
         return sportRoutineRepository.findByUserId(userId);
     }
+
 
     public SportRoutine updateSportName(Long routineId, String sportName) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
@@ -112,7 +114,26 @@ public class SportRoutineService {
         return availability;
     }
 
+
     public SportRoutine saveSportRoutine(SportRoutine sportRoutine){
         return sportRoutineRepository.save(sportRoutine);
+    }
+
+
+    public String generateSportRoutine(Long userId) {
+        SportRoutine sportRoutine = findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + userId));
+            
+        
+        String promptMessage = "Responda como um especialista em esportes. " +
+                "Baseado no esporte: " + sportRoutine.getSportName() + 
+                ", gere uma rotina de treino personalizada para o usuário, " + 
+                "especializado para o esporte desejado. " + 
+                "A rotina deve preencher os seguintes dias e horários disponíveis: " +
+                sportRoutine.getWeeklyAvailability().toString();
+        
+        // String routine = fachadaLLM.chat(promptMessage);
+        System.out.println("PROMPT ----------------------: \n" + promptMessage);
+        return promptMessage;
     }
 }
