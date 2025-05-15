@@ -24,10 +24,6 @@ export default function RegisterPage() {
       className="w-full min-h-screen flex flex-col bg-[var(--gray-bg)]"
       style={{ minHeight: "100vh" }}
     >
-      {/* Header */}
-      <header className="w-full flex justify-center items-center py-5">
-        <h1>SportsLife</h1>
-      </header>
 
       {/* Centralização por flex */}
       <div className="flex-1 flex flex-col items-center justify-center">

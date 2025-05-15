@@ -2,39 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLogin } from "@/hooks/use-login";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const { mutate } = useLogin();
 
-  function handleChange(e) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setSuccess("");
-    setError("");
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Aqui você pode adicionar sua lógica de autenticação
+
     if (form.email && form.password) {
-      setSuccess("Login efetuado com sucesso!");
-      setForm({ email: "", password: "" });
-      setError("");
+      try {
+        await mutate({ email: form.email, password: form.password });
+      } catch (error) {
+        console.error("Erro ao autenticar:", error);
+        toast.error("Falha ao autenticar.");
+      }
     } else {
-      setError("Preencha todos os campos.");
+      toast.error("Preencha todos os campos.");
     }
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-[var(--gray-bg)]">
-      {/* Header */}
-      <header className="w-full flex justify-center items-center py-5">
-        <h1>SportsLife</h1>
-      </header>
-      {/* Centralização por flex */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="form-wrapper">
+    <div className="w-full mt-[8%] flex flex-col items-center bg-[var(--gray-bg)]">
+      <div className="flex-1 flex flex-col justify-center items-center p-6 w-full max-w-md">
+        <div className="form-wrapper p-6 bg-white rounded-lg shadow-lg w-full">
           <div className="form-title">Entrar</div>
           <div className="form-desc">Acesse sua conta</div>
           <form onSubmit={handleSubmit} className="w-full space-y-3">
@@ -68,12 +65,6 @@ export default function LoginPage() {
             <button type="submit" className="main-button">
               Entrar
             </button>
-            {success && <div className="form-success">{success}</div>}
-            {error && (
-              <div className="form-success" style={{ color: "salmon" }}>
-                {error}
-              </div>
-            )}
           </form>
           <Link href="/register" className="secondary-button">
             Ainda não tem conta? Criar agora
