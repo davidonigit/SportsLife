@@ -47,7 +47,7 @@ public class SportRoutineService {
 
     public SportRoutine initializeWeeklyAvailability(Long routineId) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-                .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
+            .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
         
         sportRoutine.getWeeklyAvailability().clear();
         
@@ -82,26 +82,6 @@ public class SportRoutineService {
     }
     
 
-    public SportRoutine updateMultipleDaysAvailability(
-            Long routineId, 
-            Map<DayOfWeekEnum, DailyAvailabilityDTO> availabilityMap) {
-        
-        SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-                .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
-        
-        availabilityMap.forEach((day, availability) -> {
-            sportRoutine.updateAvailability(
-                day,
-                availability.morning(),
-                availability.afternoon(),
-                availability.evening()
-            );
-        });
-        
-        return sportRoutineRepository.save(sportRoutine);
-    }
-    
-
     public DailyAvailability getDailyAvailability(Long routineId, DayOfWeekEnum day) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
                 .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
@@ -119,21 +99,27 @@ public class SportRoutineService {
         return sportRoutineRepository.save(sportRoutine);
     }
 
+    public String weekAvailabilityString(SportRoutine sportRoutine) {
+        StringBuilder availability = new StringBuilder();
+        for (DailyAvailability dailyAvailability : sportRoutine.getWeeklyAvailability()) {
+            availability.append(dailyAvailability.getDayOfWeek())
+                .append(": ")
+                .append("Manhã: ").append(dailyAvailability.isMorningAvailable() ? "Disponível" : "Indisponível").append(", ")
+                .append("Tarde: ").append(dailyAvailability.isAfternoonAvailable() ? "Disponível" : "Indisponível").append(", ")
+                .append("Noite: ").append(dailyAvailability.isEveningAvailable() ? "Disponível" : "Indisponível").append("\n");
+        }
+        return availability.toString();
+    }
 
-    public String generateSportRoutine(Long userId) {
-        SportRoutine sportRoutine = findByUserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + userId));
-            
+
+    public String generateSportRoutine(Long routineId) {
+        SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
+            .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
         
-        String promptMessage = "Responda como um especialista em esportes. " +
-                "Baseado no esporte: " + sportRoutine.getSportName() + 
-                ", gere uma rotina de treino personalizada para o usuário, " + 
-                "especializado para o esporte desejado. " + 
-                "A rotina deve preencher os seguintes dias e horários disponíveis: " +
-                sportRoutine.getWeeklyAvailability().toString();
-        
-        // String routine = fachadaLLM.chat(promptMessage);
-        System.out.println("PROMPT ----------------------: \n" + promptMessage);
-        return promptMessage;
+        String routine = fachadaLLM.chat(sportRoutine.getSportName(), weekAvailabilityString(sportRoutine));
+
+        sportRoutine.setGeneratedRoutine(routine);
+        sportRoutineRepository.save(sportRoutine);
+        return routine;
     }
 }

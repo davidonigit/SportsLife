@@ -10,12 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.grupo3.sportslife_app.dto.SportRoutineDTO;
 import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.security.SecurityUtils;
+import com.grupo3.sportslife_app.service.FachadaLLM;
 import com.grupo3.sportslife_app.service.SportRoutineService;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 
 @Controller
@@ -36,10 +35,14 @@ public class SportRoutineController {
 
 
     @GetMapping("/generate")
-    public void generateSportRoutine() {
+    public ResponseEntity generateSportRoutine() {
         Long userId = securityUtils.getCurrentUserId();
-        System.out.println("User ID!!!: " + userId);
-        sportRoutineService.generateSportRoutine(userId);
+        SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
+
+        String routine = sportRoutineService.generateSportRoutine(sportRoutine.getId());
+
+        return ResponseEntity.ok(routine);
     }
     
 
