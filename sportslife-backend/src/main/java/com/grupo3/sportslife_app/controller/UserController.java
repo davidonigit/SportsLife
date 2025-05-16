@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,11 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo3.sportslife_app.dto.CreateUserDTO;
 import com.grupo3.sportslife_app.dto.UserDTO;
-import com.grupo3.sportslife_app.model.GoalBoard;
-import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.model.User;
-import com.grupo3.sportslife_app.repository.UserRepository;
-import com.grupo3.sportslife_app.service.SportRoutineService;
+import com.grupo3.sportslife_app.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,75 +28,44 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     @Autowired
-    UserRepository userRepository;
-    @Autowired
-    SportRoutineService sportRoutineService;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    UserService userService;
 
     @GetMapping
     public ResponseEntity<List<User>> allUsers() {
-        return ResponseEntity.ok(userRepository.findAll());
+        return ResponseEntity.ok(userService.getAll());
     }
 
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody CreateUserDTO body) {
-        // Verifica se o email já existe
-        if (userRepository.existsByEmail(body.email())) {
+        if (userService.existsByEmail(body.email())) {
             return ResponseEntity.badRequest().build();
         }
 
-        // Cria o usuário com as roles
-        GoalBoard board = new GoalBoard();
-        SportRoutine sportRoutine = new SportRoutine();
-        User user = new User(null, body.name(), body.email(), passwordEncoder.encode(body.password()), board, sportRoutine);
-        sportRoutine.setUser(user);
-        userRepository.save(user);
-        sportRoutineService.initializeWeeklyAvailability(sportRoutine.getId());
-
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userService.create(body));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> user(@PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userService.getById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserDTO body) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setPassword(passwordEncoder.encode(body.password()));
-        user.setName(body.name());
-        user.setEmail(body.email());
-        userRepository.save(user);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userService.update(id, body));
     }
 
     @DeleteMapping("/{id}")
-public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-    var authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        if (!userService.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        userService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
-    
-    /* String email = (String) authentication.getPrincipal();
-    User currentUser = userRepository.findByEmail(email)
-                         .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
-    
-    //Bloqueia user de se autoexcluir
-    if (currentUser.getId().equals(id)) {
-       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    } */
-    
-    if (!userRepository.existsById(id)) {
-        return ResponseEntity.notFound().build();
-    }
-    
-    userRepository.deleteById(id);
-    return ResponseEntity.noContent().build();
-}
 }

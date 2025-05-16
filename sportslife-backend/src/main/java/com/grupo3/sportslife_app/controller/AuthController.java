@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo3.sportslife_app.dto.LoginRequestDTO;
-import com.grupo3.sportslife_app.dto.ResponseDTO;
+import com.grupo3.sportslife_app.dto.LoginResponseDTO;
 import com.grupo3.sportslife_app.dto.UserDTO;
 import com.grupo3.sportslife_app.model.User;
 import com.grupo3.sportslife_app.repository.UserRepository;
@@ -25,12 +25,12 @@ public class AuthController {
     private final TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<ResponseDTO> login(@RequestBody LoginRequestDTO body) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO body) {
         User user = this.userRepository.findByEmail(body.email())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (passwordEncoder.matches(body.password(), user.getPassword())) {
             String token = this.tokenService.generateToken(user);
-            return ResponseEntity.ok(new ResponseDTO(user.getEmail(), token,
+            return ResponseEntity.ok(new LoginResponseDTO(user.getEmail(), token,
                     new UserDTO(user.getName(), user.getEmail(), null, user.getId())));
         }
         return ResponseEntity.badRequest().build();
