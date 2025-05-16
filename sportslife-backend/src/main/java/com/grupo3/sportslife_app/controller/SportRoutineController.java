@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.grupo3.sportslife_app.dto.SportRoutineDTO;
 import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.security.SecurityUtils;
+import com.grupo3.sportslife_app.service.FachadaLLM;
 import com.grupo3.sportslife_app.service.SportRoutineService;
 
 import lombok.AllArgsConstructor;
@@ -23,22 +24,27 @@ public class SportRoutineController {
     
     private final SportRoutineService sportRoutineService;
     private final SecurityUtils securityUtils;
-
+    
     @GetMapping
     public ResponseEntity<SportRoutine> getMyRoutine() {
         Long userId = securityUtils.getCurrentUserId();
-        
         return sportRoutineService.findByUserId(userId)
                 .map(routine -> ResponseEntity.ok(routine))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+
+    @GetMapping("/generate")
+    public ResponseEntity generateSportRoutine() {
+        Long userId = securityUtils.getCurrentUserId();
+        SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
+
+        String routine = sportRoutineService.generateSportRoutine(sportRoutine.getId());
+
+        return ResponseEntity.ok(routine);
+    }
     
-    /* @GetMapping("/{id}")
-    public ResponseEntity<SportRoutine> getSportRoutineById(@PathVariable Long id){
-        return sportRoutineService.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    } */
 
     @PutMapping
     public ResponseEntity<SportRoutine> updateSportRoutine(@RequestBody SportRoutineDTO body){
@@ -58,4 +64,6 @@ public class SportRoutineController {
         sportRoutineService.saveSportRoutine(sportRoutine);
         return ResponseEntity.ok(sportRoutine);
     }
+
+    
 }

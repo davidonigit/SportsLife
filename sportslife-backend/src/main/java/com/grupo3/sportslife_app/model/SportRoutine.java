@@ -32,6 +32,9 @@ public class SportRoutine {
     
     @Column(nullable = true)
     private String sportName;
+
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String generatedRoutine;
     
     @OneToMany(mappedBy = "sportRoutine", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
