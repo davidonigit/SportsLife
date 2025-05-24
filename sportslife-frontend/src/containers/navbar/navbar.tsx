@@ -12,6 +12,7 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     toast.success("Saiu com sucesso!");
+    router.push("/");
   };
 
   const handleLoginRedirect = () => {
@@ -32,8 +33,8 @@ export default function Navbar() {
       <h1
         style={{
           fontSize: "2rem",
-          letterSpacing: "0.05em"
-        }} 
+          letterSpacing: "0.05em",
+        }}
         className="cursor-pointer"
         onClick={() => router.push("/")}
       >
