@@ -21,7 +21,7 @@ export default function LoginPage() {
     if (form.email && form.password) {
       try {
         await mutate({ email: form.email, password: form.password });
-        router.push("/sport-routine");
+        router.push("/home");
       } catch (error) {
         console.error("Erro ao autenticar:", error);
         toast.error("Falha ao realizar login.");
