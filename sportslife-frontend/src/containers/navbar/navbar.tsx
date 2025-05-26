@@ -6,8 +6,10 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/stores/auth/auth-store";
 
 export default function Navbar() {
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, user } = useAuthStore();
   const router = useRouter();
+  console.log("isAuthenticated:", isAuthenticated);
+  console.log("user", user)
 
   const handleLogout = () => {
     logout();

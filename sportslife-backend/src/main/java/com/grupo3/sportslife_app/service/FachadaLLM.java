@@ -1,6 +1,5 @@
 package com.grupo3.sportslife_app.service;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.json.JSONArray; // Importar do org.json

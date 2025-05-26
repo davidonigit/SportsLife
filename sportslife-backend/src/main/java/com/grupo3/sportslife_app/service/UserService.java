@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.grupo3.sportslife_app.dto.CreateUserDTO;
+import com.grupo3.sportslife_app.dto.NotificationDTO;
 import com.grupo3.sportslife_app.dto.UserDTO;
 import com.grupo3.sportslife_app.model.GoalBoard;
 import com.grupo3.sportslife_app.model.SportRoutine;
@@ -27,16 +28,21 @@ public class UserService {
     SportRoutineService sportRoutineService;
 
     @Autowired
+    NotificationService notificationService;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
     
     @Transactional
     public User create(CreateUserDTO userDTO) {
         GoalBoard board = new GoalBoard();
         SportRoutine sportRoutine = new SportRoutine();
-        User user = new User(null, userDTO.name(), userDTO.email(), passwordEncoder.encode(userDTO.password()), board, sportRoutine);
+        User user = new User(null, userDTO.name(), userDTO.email(), passwordEncoder.encode(userDTO.password()), board, sportRoutine, null, null);
         sportRoutine.setUser(user);
-        userRepository.save(user);
+        user = userRepository.save(user);
         sportRoutineService.initializeWeeklyAvailability(sportRoutine.getId());
+        NotificationDTO notificationDTO = new NotificationDTO("Bem vindo(a)", "Seja muito bem vindo(a), ao SportsLife", user.getId());
+        notificationService.create(notificationDTO);
         return user;
     }
 

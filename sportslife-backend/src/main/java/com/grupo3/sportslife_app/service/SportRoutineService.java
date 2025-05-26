@@ -1,15 +1,17 @@
 package com.grupo3.sportslife_app.service;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.grupo3.sportslife_app.dto.DailyAvailabilityDTO;
+import com.grupo3.sportslife_app.dto.NotificationDTO;
 import com.grupo3.sportslife_app.enums.DayOfWeekEnum;
 import com.grupo3.sportslife_app.model.DailyAvailability;
 import com.grupo3.sportslife_app.model.SportRoutine;
+import com.grupo3.sportslife_app.model.SportRoutineHistory;
 import com.grupo3.sportslife_app.repository.DailyAvailabilityRepository;
+import com.grupo3.sportslife_app.repository.SportRoutineHistoryRepository;
 import com.grupo3.sportslife_app.repository.SportRoutineRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +24,9 @@ import lombok.AllArgsConstructor;
 public class SportRoutineService {
     
     private final SportRoutineRepository sportRoutineRepository;
+    private final SportRoutineHistoryRepository sportRoutineHistoryRepository;
     private final DailyAvailabilityRepository dailyAvailabilityRepository;
+    private final NotificationService notificationService;
     private final FachadaLLM fachadaLLM;
     
 
@@ -125,10 +129,29 @@ public class SportRoutineService {
             throw new IllegalArgumentException("A rotina nao possui horarios disponiveis.");
         }
 
+        if(sportRoutine.getGeneratedRoutine() != null) {
+            saveSportRoutineHistory(sportRoutine);
+        }
+
+
         String routine = fachadaLLM.chat(sportRoutine.getSportName(), weekAvailabilityString(sportRoutine));
 
         sportRoutine.setGeneratedRoutine(routine);
         sportRoutineRepository.save(sportRoutine);
+        NotificationDTO notificationDTO = new NotificationDTO("Rotina gerada com sucesso!", "A sua rotina de treino para o esporte " + sportRoutine.getSportName() + " foi gerada com sucesso. Parabéns, meta marcha em seguir o treinamento e seja feliz, stay alive " + sportRoutine.getUser().getName() + ".", sportRoutine.getUser().getId());
+        notificationService.create(notificationDTO);
         return routine;
+    }
+
+    private void saveSportRoutineHistory(SportRoutine sportRoutine){
+        SportRoutineHistory history = new SportRoutineHistory();
+        history.setGeneratedRoutine(sportRoutine.getGeneratedRoutine());
+        history.setSportName(sportRoutine.getSportName());
+        history.setUser(sportRoutine.getUser());
+        sportRoutineHistoryRepository.save(history);
+    }
+
+    public List<SportRoutineHistory> getSportRoutineHistory(Long userId) {
+        return sportRoutineHistoryRepository.findByUserId(userId);
     }
 }
