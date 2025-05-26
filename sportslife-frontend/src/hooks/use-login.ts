@@ -9,10 +9,14 @@ export function useLogin() {
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      setUser(data.user);
+      const user = {
+        id: data.user.userId.toString(),
+        name: data.user.name,
+        email: data.user.email,
+      }
+      setUser(user);
       setToken(data.token);
       setAuthenticated(true);
-      localStorage.setItem("token", data.token);
       toast.success("Login realizado com sucesso!");
     },
     onError: () => {
