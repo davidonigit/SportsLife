@@ -1,6 +1,8 @@
 package com.grupo3.sportslife_app.controller;
 
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,11 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.grupo3.sportslife_app.dto.SportRoutineDTO;
 import com.grupo3.sportslife_app.model.SportRoutine;
+import com.grupo3.sportslife_app.model.SportRoutineHistory;
 import com.grupo3.sportslife_app.security.SecurityUtils;
 import com.grupo3.sportslife_app.service.SportRoutineService;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 @Controller
@@ -34,7 +38,7 @@ public class SportRoutineController {
 
 
     @GetMapping("/generate")
-    public ResponseEntity generateSportRoutine() {
+    public ResponseEntity<String> generateSportRoutine() {
         Long userId = securityUtils.getCurrentUserId();
         SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
             .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
@@ -67,5 +71,10 @@ public class SportRoutineController {
         return ResponseEntity.ok(sportRoutine);
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<List<SportRoutineHistory>> getSportRoutineHistory() {
+        Long userId = securityUtils.getCurrentUserId();
+        return ResponseEntity.ok(sportRoutineService.getSportRoutineHistory(userId));
+    }
     
 }

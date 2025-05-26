@@ -33,7 +33,7 @@ public class UserService {
     public User create(CreateUserDTO userDTO) {
         GoalBoard board = new GoalBoard();
         SportRoutine sportRoutine = new SportRoutine();
-        User user = new User(null, userDTO.name(), userDTO.email(), passwordEncoder.encode(userDTO.password()), board, sportRoutine);
+        User user = new User(null, userDTO.name(), userDTO.email(), passwordEncoder.encode(userDTO.password()), board, sportRoutine, null);
         sportRoutine.setUser(user);
         userRepository.save(user);
         sportRoutineService.initializeWeeklyAvailability(sportRoutine.getId());

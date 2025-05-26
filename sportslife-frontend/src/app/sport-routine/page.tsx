@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +7,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
 // Esportes disponíveis
-const sportsList = [
+export const sportsList = [
   "Futebol",
   "Basquete",
   "Corrida",
@@ -20,7 +21,7 @@ const sportsList = [
 ];
 
 // Converter strings do enum para nome do dia
-const dayOfWeekEnum: Record<string, string> = {
+export const dayOfWeekEnum: Record<string, string> = {
   SUNDAY: "Domingo",
   MONDAY: "Segunda-feira",
   TUESDAY: "Terça-feira",
@@ -30,7 +31,7 @@ const dayOfWeekEnum: Record<string, string> = {
   SATURDAY: "Sábado",
 };
 
-const sortedWeeklyAvailability = [
+export const sortedWeeklyAvailability = [
   "SUNDAY",
   "MONDAY",
   "TUESDAY",
@@ -41,7 +42,7 @@ const sortedWeeklyAvailability = [
 ];
 
 // Tipos para dados de disponibilidade
-interface DailyAvailability {
+export interface DailyAvailability {
   id: number;
   dayOfWeek: string;
   morningAvailable: boolean;
@@ -49,7 +50,7 @@ interface DailyAvailability {
   eveningAvailable: boolean;
 }
 
-interface SportRoutine {
+export interface SportRoutine {
   sportName: string;
   weeklyAvailability: DailyAvailability[];
   generatedRoutine: string;
@@ -57,7 +58,6 @@ interface SportRoutine {
 
 export default function SportRoutinePage() {
   const [selectedSport, setSelectedSport] = useState<string>(sportsList[0]);
-  const [sportName, setSportName] = useState<string>("");
   const [weeklyAvailability, setWeeklyAvailability] = useState<
     DailyAvailability[]
   >([]);
@@ -67,7 +67,7 @@ export default function SportRoutinePage() {
   const [isLoadingRoutine, setIsLoadingRoutine] = useState<boolean>(true);
   const [routineError, setRoutineError] = useState<string | null>(null);
 
-  const { user, token, isAuthenticated } = useAuthStore();
+  const { token, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     async function fetchData() {
@@ -102,7 +102,6 @@ export default function SportRoutinePage() {
 
         const data: SportRoutine = await response.json();
         console.log("Dados recebidos:", data);
-        setSportName(data.sportName);
         setSelectedSport(data.sportName);
         setGeneratedRoutine(data.generatedRoutine);
         console.log("Rotina gerada:", data.generatedRoutine);
@@ -154,8 +153,10 @@ export default function SportRoutinePage() {
       } else {
         toast.error("Erro ao salvar rotina.");
       }
-    } catch (error) {
-      toast.error("Erro de conexão.");
+    } catch (error: any) {
+      toast.error("Erro de conexão.", {
+        description: error
+      });
     }
   }
 
@@ -236,7 +237,7 @@ export default function SportRoutinePage() {
           </thead>
           <tbody>
             {["morningAvailable", "afternoonAvailable", "eveningAvailable"].map(
-              (time, timeIndex) => (
+              (time) => (
                 <tr key={time}>
                   <td className="p-2 text-center font-medium">
                     {time === "morningAvailable"

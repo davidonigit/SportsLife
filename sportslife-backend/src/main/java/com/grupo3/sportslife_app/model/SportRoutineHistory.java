@@ -1,0 +1,34 @@
+package com.grupo3.sportslife_app.model;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class SportRoutineHistory {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = true)
+    private String sportName;
+
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String generatedRoutine;
+    
+    @ManyToOne
+    @JsonBackReference
+    private User user;
+}
