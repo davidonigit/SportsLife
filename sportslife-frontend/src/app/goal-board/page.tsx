@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { useAuthStore } from "@/stores/auth/auth-store"; // Importe seu useAuthStore
+import { useAuthStore } from "@/stores/auth/auth-store";
 
 export enum GoalStatus {
   TO_DO = "TO_DO",
@@ -11,7 +11,7 @@ export enum GoalStatus {
 }
 
 export interface Goal {
-  id: number; // Alterado para number
+  id: number;
   name: string;
   status: GoalStatus;
 }
@@ -29,18 +29,17 @@ interface GoalCardProps {
 
 const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md mb-3 border border-gray-200">
-      <h4 className="font-semibold text-lg text-gray-800">{goal.name}</h4>
-      <div className="flex justify-end gap-2 mt-3">
-        <button
-          onClick={() => onEdit(goal)}
-          className="text-sm bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded-md transition-colors"
-        >
+    <div className="bg-[var(--gray-border)] p-4 rounded-lg shadow-md mb-3 border border-gray-200 max-w-[80%] mx-auto">
+      <h4 className="font-semibold text-lg text-gray-800 break-all">
+        {goal.name}
+      </h4>
+      <div className="flex justify-center gap-2 mt-4">
+        <button onClick={() => onEdit(goal)} className=" main-button flex-1">
           Editar
         </button>
         <button
           onClick={() => onDelete(goal.id)}
-          className="text-sm bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded-md transition-colors"
+          className="secondary-button flex-1"
         >
           Excluir
         </button>
@@ -49,7 +48,6 @@ const GoalCard: React.FC<GoalCardProps> = ({ goal, onEdit, onDelete }) => {
   );
 };
 
-// --- Componente do Modal de Edição de Meta ---
 interface EditGoalModalProps {
   goal: Goal | null; // A meta a ser editada, ou null se nenhum modal aberto
   onSave: (updatedGoal: Goal) => void;
@@ -130,18 +128,15 @@ const EditGoalModal: React.FC<EditGoalModalProps> = ({
             </select>
           </div>
           <div className="flex justify-end gap-3">
+            <button type="submit" className="main-button">
+              Salvar
+            </button>
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors"
+              className="secondary-button"
             >
               Cancelar
-            </button>
-            <button
-              type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors"
-            >
-              Salvar
             </button>
           </div>
         </form>
@@ -150,7 +145,6 @@ const EditGoalModal: React.FC<EditGoalModalProps> = ({
   );
 };
 
-// --- Componente Principal da Página de Metas ---
 export default function GoalBoardPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -284,16 +278,19 @@ export default function GoalBoardPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Adiciona o token de autenticação
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: newGoalName.trim() }), // Envia apenas o nome
+        body: JSON.stringify({
+          name: newGoalName,
+          status: GoalStatus.TO_DO,
+        }),
       });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Erro ao criar meta.");
       }
-      const createdGoal: Goal = await response.json(); // Backend retorna a meta criada com o ID real
-      setGoals((prevGoals) => [...prevGoals, createdGoal]);
+      const createdGoals: GoalBoard = await response.json();
+      setGoals(createdGoals.goals);
       toast.success("Meta criada com sucesso!");
     } catch (err: any) {
       toast.error(err.message || "Erro ao criar meta.");
@@ -302,7 +299,7 @@ export default function GoalBoardPage() {
 
   // --- Renderização do Layout ---
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-gray-100 p-8 w-4/5 center mx-auto">
       <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
         Quadro de Metas
       </h1>
@@ -326,7 +323,7 @@ export default function GoalBoardPage() {
       )}
 
       {!isLoading && !error && goals.length > 0 && (
-        <div className="flex flex-col md:flex-row justify-around gap-6">
+        <div className="flex md:flex-row justify-around">
           {/* Coluna "TO DO" */}
           <div className="w-full md:w-1/3 bg-gray-200 p-5 rounded-xl shadow-lg border-t-4 border-blue-500">
             <h2 className="text-2xl font-bold mb-5 text-gray-800 text-center">

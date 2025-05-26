@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 
 // Esportes disponíveis
 export const sportsList = [
+  "",
   "Futebol",
   "Basquete",
   "Corrida",
@@ -135,6 +136,10 @@ export default function SportRoutinePage() {
       sport: selectedSport,
       weeklyAvailability,
     });
+    if (selectedSport === "" || selectedSport === null) {
+      toast.error("Por favor, selecione um esporte.");
+      return;
+    }
     try {
       if (!isAuthenticated || !token) {
         toast.error("Usuário não autenticado. Faça login para salvar.");
@@ -155,7 +160,7 @@ export default function SportRoutinePage() {
       }
     } catch (error: any) {
       toast.error("Erro de conexão.", {
-        description: error
+        description: error,
       });
     }
   }
