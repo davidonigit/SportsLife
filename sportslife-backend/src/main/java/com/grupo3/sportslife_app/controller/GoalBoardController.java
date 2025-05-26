@@ -3,7 +3,6 @@ package com.grupo3.sportslife_app.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.grupo3.sportslife_app.dto.GoalDTO;
-import com.grupo3.sportslife_app.enums.StatusEnum;
 import com.grupo3.sportslife_app.model.Goal;
 import com.grupo3.sportslife_app.model.GoalBoard;
 import com.grupo3.sportslife_app.security.SecurityUtils;
@@ -41,11 +40,6 @@ public class GoalBoardController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
-
-    /* @GetMapping
-    public ResponseEntity<List<GoalBoard>> getAllGoalBoards(){
-        return ResponseEntity.ok(goalBoardService.getAllGoalBoards());
-    } */
 
     @PostMapping
     public ResponseEntity<GoalBoard> addGoalToBoard(@RequestBody GoalDTO body) {
