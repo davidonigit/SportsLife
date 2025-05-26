@@ -23,7 +23,7 @@ export default function Home() {
         <div className="flex flex-col w-full items-center">
           <h2>Acesse seu quadro de metas</h2>
           <button
-            onClick={() => router.push("/sport-routine")}
+            onClick={() => router.push("/goal-board")}
             className="secondary-button"
           >
             Quadro de Metas
