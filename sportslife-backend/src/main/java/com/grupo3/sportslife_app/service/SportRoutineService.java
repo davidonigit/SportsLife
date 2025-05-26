@@ -132,9 +132,64 @@ public class SportRoutineService {
         if(sportRoutine.getGeneratedRoutine() != null) {
             saveSportRoutineHistory(sportRoutine);
         }
+        
+        String prompt = "Responda como um especialista em esportes. " +
+                "Baseado no esporte: " + sportRoutine.getSportName() +
+                ", gere uma rotina de treino personalizada para o usuário, " +
+                "especializado para o esporte desejado. " +
+                "A rotina deve preencher os seguintes dias e horários disponíveis: " +
+               weekAvailabilityString(sportRoutine) +
+               "Retorne apenas a rotina de treino, sem explicações adicionais. " +
+                "Caso necessário, cria uma seção com informações importantes no inicio. " +
+                "Após isso, inclua um título 'Rotina de Treino Personalizada para " + sportRoutine.getSportName() +
+                "A rotina deve ser formatada em Markdown, dando maior destaque aos dias da semana. " +
+                "Sempre use os nomes dos dias da semana em português, começando pelo domingo. " +
+                "Crie uma separação no texto entre os dias para facilitar a leitura. " +
+                "Adicione a separação entre as informações importantes e a rotina.";
+
+        String routine = fachadaLLM.chat(prompt);
+
+        sportRoutine.setGeneratedRoutine(routine);
+        sportRoutineRepository.save(sportRoutine);
+        NotificationDTO notificationDTO = new NotificationDTO("Rotina gerada com sucesso!", "A sua rotina de treino para o esporte " + sportRoutine.getSportName() + " foi gerada com sucesso. Parabéns, meta marcha em seguir o treinamento e seja feliz, stay alive " + sportRoutine.getUser().getName() + ".", sportRoutine.getUser().getId());
+        notificationService.create(notificationDTO);
+        return routine;
+    }
 
 
-        String routine = fachadaLLM.chat(sportRoutine.getSportName(), weekAvailabilityString(sportRoutine));
+    public String generateSportRoutineWithFeedback(Long routineId, String feedback) {
+        SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
+            .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva nao encontrada com ID: " + routineId));
+        
+        if (sportRoutine.getSportName() == null || sportRoutine.getSportName().isEmpty()) {
+            throw new IllegalArgumentException("Esporte nao definido para a rotina.");
+        }
+
+        String availabilityString = weekAvailabilityString(sportRoutine);
+        if (!availabilityString.contains("Disponível")) {	
+            throw new IllegalArgumentException("A rotina nao possui horarios disponiveis.");
+        }
+
+        if(sportRoutine.getGeneratedRoutine() != null) {
+            saveSportRoutineHistory(sportRoutine);
+        }
+        
+        String prompt = "Responda como um especialista em esportes. " +
+                "Baseado no esporte: " + sportRoutine.getSportName() +
+                ", gere uma rotina de treino personalizada para o usuário, " +
+                "especializado para o esporte desejado. " +
+                "A rotina deve preencher os seguintes dias e horários disponíveis: " +
+               weekAvailabilityString(sportRoutine) +
+               "Leve em consideração o feedback do usuário na construção da rotina: " + feedback + ". " +
+               "Retorne apenas a rotina de treino, sem explicações adicionais. " +
+                "Caso necessário, cria uma seção com informações importantes no inicio. " +
+                "Após isso, inclua um título 'Rotina de Treino Personalizada para " + sportRoutine.getSportName() +
+                "A rotina deve ser formatada em Markdown, dando maior destaque aos dias da semana. " +
+                "Sempre use os nomes dos dias da semana em português, começando pelo domingo. " +
+                "Crie uma separação no texto entre os dias para facilitar a leitura. " +
+                "Adicione a separação entre as informações importantes e a rotina.";
+
+        String routine = fachadaLLM.chat(prompt);
 
         sportRoutine.setGeneratedRoutine(routine);
         sportRoutineRepository.save(sportRoutine);

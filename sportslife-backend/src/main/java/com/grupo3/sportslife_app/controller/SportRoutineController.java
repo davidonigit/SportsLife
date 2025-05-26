@@ -19,7 +19,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
 
 
-
 @Controller
 @RequestMapping("/api/sport-routine")
 @AllArgsConstructor
@@ -47,8 +46,20 @@ public class SportRoutineController {
 
         return ResponseEntity.ok(routine);
     }
-    
 
+    
+   @PutMapping("/feedback")
+    public ResponseEntity<String> generateSportRoutineWithFeedback(@RequestBody String feedback) {
+        Long userId = securityUtils.getCurrentUserId();
+        SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
+            .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
+
+        String routine = sportRoutineService.generateSportRoutineWithFeedback(sportRoutine.getId(), feedback);
+
+        return ResponseEntity.ok(routine);
+    }
+    
+    
     @PutMapping
     public ResponseEntity<SportRoutine> updateSportRoutine(@RequestBody SportRoutineDTO body){
 
