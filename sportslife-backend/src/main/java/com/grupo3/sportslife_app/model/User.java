@@ -2,6 +2,7 @@ package com.grupo3.sportslife_app.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -47,6 +48,10 @@ public class User {
     private SportRoutine sportRoutine;
 
     @OneToMany(cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonBackReference
     private List<SportRoutineHistory> sportRoutineHistory;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JsonBackReference
+    private List<Notification> notifications;
 }

@@ -16,7 +16,7 @@ export default function Home() {
             <h2>Acesse sua rotina esportiva</h2>
             <button
               onClick={() => router.push("/sport-routine")}
-              className="secondary-button"
+              className="secondary-button max-w-[200px]"
             >
               Rotina Esportiva
             </button>
@@ -25,16 +25,25 @@ export default function Home() {
             <h2>Acesse seu histórico de treinos</h2>
             <button
               onClick={() => router.push("/history")}
-              className="secondary-button"
+              className="secondary-button max-w-[200px]"
             >
               Histórico de Treinos
+            </button>
+          </div>
+          <div className="flex flex-col w-full items-center">
+            <h2>Acesse suas notificações</h2>
+            <button
+              onClick={() => router.push("/notifications")}
+              className="secondary-button max-w-[200px]"
+            >
+              Notificações
             </button>
           </div>
           <div className="flex flex-col w-full items-center">
             <h2>Acesse seu quadro de metas</h2>
             <button
               onClick={() => router.push("/sport-routine")}
-              className="secondary-button"
+              className="secondary-button max-w-[200px]"
             >
               Quadro de Metas
             </button>

@@ -17,20 +17,20 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SportRoutineHistory {
-    
+public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = true)
-    private String sportName;
+
+    private String title;
 
     @Column(nullable = true, columnDefinition = "TEXT")
-    private String generatedRoutine;
-    
+    private String description;
+
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "receiver_id", nullable = false)
     @JsonManagedReference
-    private User user;
+    private User receiver;
+
 }

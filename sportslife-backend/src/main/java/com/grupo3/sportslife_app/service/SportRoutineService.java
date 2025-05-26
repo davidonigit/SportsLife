@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.grupo3.sportslife_app.dto.NotificationDTO;
 import com.grupo3.sportslife_app.enums.DayOfWeekEnum;
 import com.grupo3.sportslife_app.model.DailyAvailability;
 import com.grupo3.sportslife_app.model.SportRoutine;
@@ -25,6 +26,7 @@ public class SportRoutineService {
     private final SportRoutineRepository sportRoutineRepository;
     private final SportRoutineHistoryRepository sportRoutineHistoryRepository;
     private final DailyAvailabilityRepository dailyAvailabilityRepository;
+    private final NotificationService notificationService;
     private final FachadaLLM fachadaLLM;
     
 
@@ -136,6 +138,8 @@ public class SportRoutineService {
 
         sportRoutine.setGeneratedRoutine(routine);
         sportRoutineRepository.save(sportRoutine);
+        NotificationDTO notificationDTO = new NotificationDTO("Rotina gerada com sucesso!", "A sua rotina de treino para o esporte " + sportRoutine.getSportName() + " foi gerada com sucesso. Parabéns, meta marcha em seguir o treinamento e seja feliz, stay alive " + sportRoutine.getUser().getName() + ".", sportRoutine.getUser().getId());
+        notificationService.create(notificationDTO);
         return routine;
     }
 
