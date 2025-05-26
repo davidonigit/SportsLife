@@ -204,6 +204,57 @@ export default function SportRoutinePage() {
       toast.error(error.message || "Erro ao gerar a rotina.");
     } finally {
       setIsLoadingRoutine(false);
+      (document.querySelector("textarea") as HTMLTextAreaElement).value = "";
+    }
+  }
+
+  async function submitFeedback() {
+    //Pegar o feedback da textarea
+    const feedback = (document.querySelector("textarea") as HTMLTextAreaElement)
+      .value;
+    if (!feedback || feedback.trim() === "") {
+      toast.error("Por favor, escreva um feedback antes de enviar.");
+      return;
+    }
+    try {
+      setIsLoadingRoutine(true);
+      setRoutineError(null);
+
+      if (!isAuthenticated || !token) {
+        toast.error("Usuário não autenticado. Faça login para gerar a rotina.");
+        setIsLoadingRoutine(false);
+        return;
+      }
+      console.log("Enviando feedback:", feedback);
+      const response = await fetch(
+        "http://localhost:8080/api/sport-routine/feedback",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ feedback }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(
+          `Erro ao gerar rotina: ${response.status} - ${
+            errorData || "Resposta vazia"
+          }`
+        );
+      }
+
+      toast.success("Rotina gerada com sucesso!");
+      setRoutineUpdateTrigger((prev) => prev + 1);
+    } catch (error: any) {
+      console.error("Erro ao gerar rotina:", error);
+      setRoutineError(error.message || "Não foi possível gerar a rotina.");
+      toast.error(error.message || "Erro ao gerar a rotina.");
+    } finally {
+      setIsLoadingRoutine(false);
     }
   }
 
@@ -302,7 +353,21 @@ export default function SportRoutinePage() {
         </div>
         <button onClick={generateRoutine} className="secondary-button mb-6">
           {" "}
-          Gerar Treino
+          Gerar Treino Personalizado
+        </button>
+      </div>
+      <h1>Enviar feedback sobre a Rotina de Treino</h1>
+      <div className="w-4/5 max-w-sm p-4 rounded-lg bg-[var(--form-white)]">
+        <textarea
+          className="w-full max-w-sm p-2 border border-gray-300 rounded-lg mb-4"
+          placeholder="Escreva seu feedback aqui..."
+          rows={2}
+          maxLength={300}
+        ></textarea>
+
+        <button onClick={submitFeedback} className="secondary-button mb-6">
+          {" "}
+          Enviar Feedback e Criar Nova Rotina
         </button>
       </div>
     </div>

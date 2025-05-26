@@ -25,21 +25,7 @@ public class FachadaLLM {
         this.webClient = webClientBuilder.build();
     }
 
-    public String chat(String sportName, String weekAvailability) {
-
-        String prompt = "Responda como um especialista em esportes. " +
-                "Baseado no esporte: " + sportName +
-                ", gere uma rotina de treino personalizada para o usuário, " +
-                "especializado para o esporte desejado. " +
-                "A rotina deve preencher os seguintes dias e horários disponíveis: " +
-               weekAvailability +
-               "Retorne apenas a rotina de treino, sem explicações adicionais. " +
-                "Caso necessário, cria uma seção com informações importantes no inicio. " +
-                "A rotina deve ser formatada em Markdown, dando maior destaque aos dias da semana. " +
-                "Sempre use os nomes dos dias da semana em português, começando pelo domingo. " +
-                "Crie uma separação no texto entre os dias para facilitar a leitura. " +
-                "Adicione a separação entre as informações importantes e a rotina.";
-
+    public String chat(String prompt) {
 
         Map<String, Object> requestBody = Map.of(
             "contents", new Object[] {
