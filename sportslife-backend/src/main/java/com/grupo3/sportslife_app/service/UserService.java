@@ -14,6 +14,7 @@ import com.grupo3.sportslife_app.model.GoalBoard;
 import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.model.User;
 import com.grupo3.sportslife_app.repository.UserRepository;
+import com.grupo3.sportslife_app.security.SecurityUtils;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -33,9 +34,15 @@ public class UserService {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    SecurityUtils securityUtils;
     
     @Transactional
     public User create(CreateUserDTO userDTO) {
+        if(existsByEmail(userDTO.email())) {
+            throw new IllegalArgumentException("Email " + userDTO.email() + " already exists");
+        }
         GoalBoard board = new GoalBoard();
         SportRoutine sportRoutine = new SportRoutine();
         User user = new User(null, userDTO.name(), userDTO.email(), passwordEncoder.encode(userDTO.password()), board, sportRoutine, null, null);
@@ -64,6 +71,10 @@ public class UserService {
     }
 
     public void deleteById(Long id) {
+        Long userLoggedId = securityUtils.getCurrentUserId();
+        if (userLoggedId == null) {
+            throw new UserNotFoundException("No user logged in");
+        }
         User user = getById(id);
         userRepository.delete(user);
     }

@@ -43,7 +43,7 @@ public class SportRoutineService {
     public SportRoutine findByUserId() {
         Long userId = securityUtils.getCurrentUserId();
         if (userId == null) {
-            throw new UserNotFoundException("User not found");
+            throw new UserNotFoundException("No user logged in");
         }
         return sportRoutineRepository.findByUserId(userId).orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva não encontrada para o usuário com ID: " + userId));
     }
@@ -218,7 +218,7 @@ public class SportRoutineService {
     public List<SportRoutineHistory> getSportRoutineHistory() {
         Long userId = securityUtils.getCurrentUserId();
         if (userId == null) {
-            throw new UserNotFoundException("User not found");
+            throw new UserNotFoundException("No user logged in");
         }
         return sportRoutineHistoryRepository.findByUserId(userId);
     }
