@@ -5,12 +5,15 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.grupo3.sportslife_app.dto.GoalDTO;
+import com.grupo3.sportslife_app.exception.GoalBoardNotFoundException;
+import com.grupo3.sportslife_app.exception.GoalNotFoundException;
 import com.grupo3.sportslife_app.model.Goal;
 import com.grupo3.sportslife_app.model.GoalBoard;
 import com.grupo3.sportslife_app.repository.GoalBoardRepository;
 import com.grupo3.sportslife_app.repository.GoalRepository;
+import com.grupo3.sportslife_app.security.SecurityUtils;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
@@ -20,6 +23,7 @@ public class GoalBoardService {
     
     private final GoalBoardRepository goalBoardRepository;
     private final GoalRepository goalRepository;
+    private final SecurityUtils securityUtils;
 
     public List<GoalBoard> getAllGoalBoards(){
         return goalBoardRepository.findAll();
@@ -29,17 +33,24 @@ public class GoalBoardService {
         return goalBoardRepository.findById(id);
     }
 
-    public Optional<GoalBoard> findByUserId(Long userId) {
-        return goalBoardRepository.findByUserId(userId);
+    public GoalBoard findByUserId() {
+        Long userId = securityUtils.getCurrentUserId();
+        if (userId == null) {
+            throw new GoalBoardNotFoundException("User ID not found in security context");
+        }
+        return goalBoardRepository.findByUserId(userId).orElseThrow(() -> new GoalBoardNotFoundException("GoalBoard not found with UserID: " + userId));
     }
 
-    public Optional<Goal> getGoalById(Long goalId){
-        return goalRepository.findById(goalId);
+    public Goal getGoalById(Long goalId){
+        return goalRepository.findById(goalId).orElseThrow(() -> new GoalNotFoundException("Goal not found with ID: " + goalId));
     }
 
-    public GoalBoard addGoalToBoard(Goal goal, Long boardId){
-        GoalBoard goalBoard = goalBoardRepository.findById(boardId)
-            .orElseThrow(() -> new RuntimeException("GoalBoard not found with id: " + boardId));
+    public GoalBoard addGoalToBoard(GoalDTO dto){
+        Goal goal = new Goal();
+        goal.setName(dto.name());
+        goal.setStatus(dto.status());
+
+        GoalBoard goalBoard = findByUserId();
         
         goal.setGoalBoard(goalBoard);
         goalBoard.addGoal(goal);
@@ -54,15 +65,11 @@ public class GoalBoardService {
     public Goal saveGoal(Goal goal){
         return goalRepository.save(goal);
     }
-
-    //public void deleteGoalBoard(Long id){
-    //    goalBoardRepository.deleteById(id);
-    //}
     
     @Transactional
     public void deleteGoal(Long goalId){
         Goal goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new EntityNotFoundException("Meta não encontrada com ID: " + goalId));
+                .orElseThrow(() -> new GoalNotFoundException("Meta não encontrada com ID: " + goalId));
         
         GoalBoard goalBoard = goal.getGoalBoard();
         if(goalBoard != null){
@@ -71,5 +78,14 @@ public class GoalBoardService {
 
         goalRepository.delete(goal);
 
+    }
+
+    @Transactional
+    public Goal updateGoal(Long goalId, GoalDTO dto) {
+        Goal goal = goalRepository.findById(goalId)
+                .orElseThrow(() -> new GoalNotFoundException("Meta não encontrada com ID: " + goalId));
+        goal.setName(dto.name());
+        goal.setStatus(dto.status());
+        return saveGoal(goal);
     }
 }

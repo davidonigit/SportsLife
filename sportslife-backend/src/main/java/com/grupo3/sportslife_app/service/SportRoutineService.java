@@ -6,13 +6,17 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.grupo3.sportslife_app.dto.NotificationDTO;
+import com.grupo3.sportslife_app.dto.SportRoutineDTO;
 import com.grupo3.sportslife_app.enums.DayOfWeekEnum;
+import com.grupo3.sportslife_app.exception.SportRoutineNotFoundException;
+import com.grupo3.sportslife_app.exception.UserNotFoundException;
 import com.grupo3.sportslife_app.model.DailyAvailability;
 import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.model.SportRoutineHistory;
 import com.grupo3.sportslife_app.repository.DailyAvailabilityRepository;
 import com.grupo3.sportslife_app.repository.SportRoutineHistoryRepository;
 import com.grupo3.sportslife_app.repository.SportRoutineRepository;
+import com.grupo3.sportslife_app.security.SecurityUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -28,6 +32,7 @@ public class SportRoutineService {
     private final DailyAvailabilityRepository dailyAvailabilityRepository;
     private final NotificationService notificationService;
     private final FachadaLLM fachadaLLM;
+    private final SecurityUtils securityUtils;
     
 
     public Optional<SportRoutine> findById(Long id) {
@@ -35,14 +40,18 @@ public class SportRoutineService {
     }
     
 
-    public Optional<SportRoutine> findByUserId(Long userId) {
-        return sportRoutineRepository.findByUserId(userId);
+    public SportRoutine findByUserId() {
+        Long userId = securityUtils.getCurrentUserId();
+        if (userId == null) {
+            throw new UserNotFoundException("No user logged in");
+        }
+        return sportRoutineRepository.findByUserId(userId).orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva não encontrada para o usuário com ID: " + userId));
     }
 
 
     public SportRoutine updateSportName(Long routineId, String sportName) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-            .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
+            .orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
         
         sportRoutine.setSportName(sportName);
         return sportRoutineRepository.save(sportRoutine);
@@ -51,7 +60,7 @@ public class SportRoutineService {
 
     public SportRoutine initializeWeeklyAvailability(Long routineId) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-            .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
+            .orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
         
         sportRoutine.getWeeklyAvailability().clear();
         
@@ -79,7 +88,7 @@ public class SportRoutineService {
             boolean evening) {
         
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-                .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
+                .orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
         
         sportRoutine.updateAvailability(day, morning, afternoon, evening);
         return sportRoutineRepository.save(sportRoutine);
@@ -88,7 +97,7 @@ public class SportRoutineService {
 
     public DailyAvailability getDailyAvailability(Long routineId, DayOfWeekEnum day) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-                .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
+                .orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva não encontrada com ID: " + routineId));
         
         DailyAvailability availability = sportRoutine.getAvailabilityForDay(day);
         if (availability == null) {
@@ -118,7 +127,7 @@ public class SportRoutineService {
 
     public String generateSportRoutine(Long routineId) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-            .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva nao encontrada com ID: " + routineId));
+            .orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva nao encontrada com ID: " + routineId));
         
         if (sportRoutine.getSportName() == null || sportRoutine.getSportName().isEmpty()) {
             throw new IllegalArgumentException("Esporte nao definido para a rotina.");
@@ -159,7 +168,7 @@ public class SportRoutineService {
 
     public String generateSportRoutineWithFeedback(Long routineId, String feedback) {
         SportRoutine sportRoutine = sportRoutineRepository.findById(routineId)
-            .orElseThrow(() -> new EntityNotFoundException("Rotina esportiva nao encontrada com ID: " + routineId));
+            .orElseThrow(() -> new SportRoutineNotFoundException("Rotina esportiva nao encontrada com ID: " + routineId));
         
         if (sportRoutine.getSportName() == null || sportRoutine.getSportName().isEmpty()) {
             throw new IllegalArgumentException("Esporte nao definido para a rotina.");
@@ -206,7 +215,29 @@ public class SportRoutineService {
         sportRoutineHistoryRepository.save(history);
     }
 
-    public List<SportRoutineHistory> getSportRoutineHistory(Long userId) {
+    public List<SportRoutineHistory> getSportRoutineHistory() {
+        Long userId = securityUtils.getCurrentUserId();
+        if (userId == null) {
+            throw new UserNotFoundException("No user logged in");
+        }
         return sportRoutineHistoryRepository.findByUserId(userId);
+    }
+
+    public SportRoutine updateSportRoutine(SportRoutineDTO dto) {
+        SportRoutine sportRoutine = findByUserId();
+        
+        updateSportName(sportRoutine.getId(), dto.sport());
+
+        for (var dailyAvailability : dto.weeklyAvailability()) {
+            sportRoutine.updateAvailability(
+                dailyAvailability.dayOfWeek(),
+                dailyAvailability.morningAvailable(),
+                dailyAvailability.afternoonAvailable(),
+                dailyAvailability.eveningAvailable()
+            );
+        }
+        
+        saveSportRoutine(sportRoutine);
+        return sportRoutineRepository.save(sportRoutine);
     }
 }
