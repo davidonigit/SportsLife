@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.grupo3.sportslife_app.dto.NotificationDTO;
+import com.grupo3.sportslife_app.exception.SportRoutineNotFoundException;
+import com.grupo3.sportslife_app.exception.UserNotFoundException;
 import com.grupo3.sportslife_app.model.Notification;
 import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.model.User;
@@ -36,7 +38,7 @@ public class NotificationService {
     @Transactional
     public Notification create(NotificationDTO notificationDTO) {
         User user = userRepository.findById(notificationDTO.receiverId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
         Notification notification = new Notification(
             null, 
             notificationDTO.title(), 
@@ -49,9 +51,9 @@ public class NotificationService {
 
     public void createRoutineNotification(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
         SportRoutine sportRoutine = sportRoutineRepository.findByUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Sport Routine not found for user"));
+            .orElseThrow(() -> new SportRoutineNotFoundException("Sport Routine not found for UserId: " + userId));
         List<Notification> existingNotifications = notificationRepository.findByReceiver(user);
         if (existingNotifications.stream().anyMatch(n -> n.getDescription().equals(sportRoutine.getGeneratedRoutine() != null ? sportRoutine.getGeneratedRoutine() : "Acesse a sua rotina esportiva para começar a praticar!"))) {
             return;
@@ -68,7 +70,7 @@ public class NotificationService {
     public List<Notification> getAllByReceiver() {
         Long userId = securityUtils.getCurrentUserId();
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new UserNotFoundException("User not found"));
         return notificationRepository.findByReceiver(user);
     }
 

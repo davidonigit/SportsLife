@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.grupo3.sportslife_app.dto.SportRoutineDTO;
 import com.grupo3.sportslife_app.model.SportRoutine;
 import com.grupo3.sportslife_app.model.SportRoutineHistory;
-import com.grupo3.sportslife_app.security.SecurityUtils;
 import com.grupo3.sportslife_app.service.SportRoutineService;
 
 import lombok.AllArgsConstructor;
@@ -25,23 +24,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class SportRoutineController {
     
     private final SportRoutineService sportRoutineService;
-    private final SecurityUtils securityUtils;
     
     @GetMapping
     public ResponseEntity<SportRoutine> getMyRoutine() {
-        Long userId = securityUtils.getCurrentUserId();
-        return sportRoutineService.findByUserId(userId)
-                .map(routine -> ResponseEntity.ok(routine))
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(sportRoutineService.findByUserId());
     }
 
 
     @GetMapping("/generate")
     public ResponseEntity<String> generateSportRoutine() {
-        Long userId = securityUtils.getCurrentUserId();
-        SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
-
+        SportRoutine sportRoutine = sportRoutineService.findByUserId();
         String routine = sportRoutineService.generateSportRoutine(sportRoutine.getId());
 
         return ResponseEntity.ok(routine);
@@ -50,10 +42,7 @@ public class SportRoutineController {
     
    @PutMapping("/feedback")
     public ResponseEntity<String> generateSportRoutineWithFeedback(@RequestBody String feedback) {
-        Long userId = securityUtils.getCurrentUserId();
-        SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
-
+        SportRoutine sportRoutine = sportRoutineService.findByUserId();
         String routine = sportRoutineService.generateSportRoutineWithFeedback(sportRoutine.getId(), feedback);
 
         return ResponseEntity.ok(routine);
@@ -62,30 +51,12 @@ public class SportRoutineController {
     
     @PutMapping
     public ResponseEntity<SportRoutine> updateSportRoutine(@RequestBody SportRoutineDTO body){
-
-        Long userId = securityUtils.getCurrentUserId();
-        SportRoutine sportRoutine = sportRoutineService.findByUserId(userId)
-            .orElseThrow(() -> new RuntimeException("Sport Routine not found"));
-        
-        sportRoutineService.updateSportName(sportRoutine.getId(), body.sport());
-
-        for (var dailyAvailability : body.weeklyAvailability()) {
-            sportRoutine.updateAvailability(
-                dailyAvailability.dayOfWeek(),
-                dailyAvailability.morningAvailable(),
-                dailyAvailability.afternoonAvailable(),
-                dailyAvailability.eveningAvailable()
-            );
-        }
-        
-        sportRoutineService.saveSportRoutine(sportRoutine);
-        return ResponseEntity.ok(sportRoutine);
+        return ResponseEntity.ok(sportRoutineService.updateSportRoutine(body));
     }
 
     @GetMapping("/history")
     public ResponseEntity<List<SportRoutineHistory>> getSportRoutineHistory() {
-        Long userId = securityUtils.getCurrentUserId();
-        return ResponseEntity.ok(sportRoutineService.getSportRoutineHistory(userId));
+        return ResponseEntity.ok(sportRoutineService.getSportRoutineHistory());
     }
     
 }
